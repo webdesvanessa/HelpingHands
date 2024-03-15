@@ -1,0 +1,61 @@
+﻿@page "/workerprofile_classes/delete"
+@inject HelpingHands.Data.HelpingHandsContext DB
+@using HelpingHands
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>WorkerProfile_CLASS</h4>
+    <hr />
+    @if (workerprofile_class is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@workerprofile_class.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Bio</dt>
+            <dd class="col-sm-10">@workerprofile_class.Bio</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Handle</dt>
+            <dd class="col-sm-10">@workerprofile_class.Handle</dd>
+        </dl>
+        <EditForm method="post" Model="workerprofile_class" OnValidSubmit="DeleteWorkerProfile_CLASS" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(workerprofile_class is null)">Delete</button> |
+            <a href="/workerprofile_classes">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    WorkerProfile_CLASS? workerprofile_class;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        workerprofile_class = await DB.WorkerProfile_CLASS.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (workerprofile_class is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteWorkerProfile_CLASS()
+    {
+        DB.WorkerProfile_CLASS.Remove(workerprofile_class!);
+        await DB.SaveChangesAsync();
+        NavigationManager.NavigateTo("/workerprofile_classes");
+    }
+}

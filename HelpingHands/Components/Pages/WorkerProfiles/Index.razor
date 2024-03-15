@@ -1,0 +1,71 @@
+﻿@page "/workerprofiles"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using HelpingHands
+@using Faker
+
+@inject HttpClient Http
+@inject HelpingHands.Data.HelpingHandsContext DB
+
+<PageTitle>Worker Profiles</PageTitle>
+
+<h1>Worker Profiles</h1>
+
+<p>
+    <a href="workerprofiles/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" ItemsProvider="profilesProvider" Pagination="state" >
+    <PropertyColumn Property="profile => profile.Name" Sortable="true">
+@*         <ColumnOptions>
+            <div>
+                <input type="search" @bind="nameFilter" @bind:event="onchange" placeholder="Search by Name" autofocus />
+            </div>
+        </ColumnOptions> *@
+    </PropertyColumn>
+    <PropertyColumn Property="profile => profile.Handle" />
+    <PropertyColumn Property="profile => profile.Location" Sortable="true">
+@*         <ColumnOptions>
+            <div>
+                <input type="search" @bind="locationFilter" @bind:event="onchange" placeholder="Search by Location" autofocus />
+            </div>
+        </ColumnOptions> *@
+    </PropertyColumn>
+    <PropertyColumn Property="profile => profile.Tags">
+@*         <ColumnOptions>
+            <div>
+                <input type="search" @bind="tagFilter" @bind:event="onchange" placeholder="Search by Tag" autofocus />
+            </div>
+        </ColumnOptions> *@
+    </PropertyColumn>
+
+    <TemplateColumn Context="profile">
+        <a href="@($"workerprofiles/edit?id={profile.Id}")">Edit</a> |
+        <a href="@($"workerprofiles/details?id={profile.Id}")">Details</a> |
+        <a href="@($"workerprofiles/delete?id={profile.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+<Paginator State="state"/>
+
+
+
+
+
+@code
+{
+    List<WorkerProfile_CLASS> profiles = new List<WorkerProfile_CLASS>();
+    PaginationState state = new PaginationState { ItemsPerPage = 100 };
+    GridItemsProvider<WorkerProfile_CLASS>? profilesProvider;
+
+    protected override async Task OnInitializedAsync()
+    {
+        profilesProvider = async request =>
+        {
+            var response = await Http.GetFromJsonAsync<List<WorkerProfile_CLASS>>($"api/workerprofile/{request.StartIndex}/{request.Count}");
+            return GridItemsProviderResult.From(items: response, totalItemCount: 100);
+        };
+    }
+
+}
